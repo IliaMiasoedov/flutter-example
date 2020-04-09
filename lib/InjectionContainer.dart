@@ -8,5 +8,5 @@ final sl = GetIt.instance;
 Future<void> init() async {
   sl.registerLazySingleton(() => ActionRepository());
   sl.registerFactory(() => IncrementCountUseCase(repository: sl()));
-  sl.registerLazySingleton(() => HomeBlock(useCase: sl()));
+  sl.registerLazySingleton(() => HomeBloc(useCase: sl()));
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mbanking/InjectionContainer.dart';
-import 'package:mbanking/src/core/BaseState.dart';
 import 'package:mbanking/src/resource/strings.dart';
 import 'package:mbanking/src/ui/home/HomeBlock.dart';
 
@@ -10,41 +10,48 @@ class HomeScreen extends StatefulWidget {
   State<StatefulWidget> createState() => HomeScreenState();
 }
 
-class HomeScreenState extends BaseState<HomeScreen, HomeBlock> {
-  @override
-  HomeBlock getBlock() => sl<HomeBlock>();
+class HomeScreenState extends State<HomeScreen> {
+  HomeBloc bloc;
 
   @override
-  Widget build(BuildContext context) => buildUi();
+  void initState() {
+    super.initState();
+    bloc = sl<HomeBloc>();
+  }
 
-  Widget buildUi() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(Strings.homePageName),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[Text(Strings.homePageLabel), getCounterView()],
+  @override
+  void deactivate() {
+    bloc.close();
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => bloc,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(Strings.homePageName),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => {bloc.onEvent(null)},
-        child: Icon(Icons.add),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[Text(Strings.homePageLabel), getCounterView()],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => {bloc.increment()},
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }
 
   Widget getCounterView() {
-    return StreamBuilder(
-      stream: bloc.getSteam(),
-      builder: (context, d) {
-        var count = 0;
-        if (d.hasData) {
-          count = d.data;
-        }
+    return BlocBuilder<HomeBloc, int>(
+      builder: (context, state) {
         return Text(
-          '$count',
+          '$state',
           style: Theme.of(context).textTheme.headline4,
         );
       },
